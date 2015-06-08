@@ -35,6 +35,7 @@ module Fluent
       @ec2_metadata['mac']               = get_metadata('mac')
       @ec2_metadata['vpc_id']            = get_metadata("network/interfaces/macs/#{@ec2_metadata['mac']}/vpc-id")
       @ec2_metadata['subnet_id']         = get_metadata("network/interfaces/macs/#{@ec2_metadata['mac']}/subnet-id")
+      @ec2_metadata['local_ipv4']        = get_metadata('local-ipv4')
 
       # get tags
       if @map.values.any? { |v| v.match(/^\${tagset_/) }
@@ -110,7 +111,7 @@ module Fluent
       end
 
       def expand(str)
-        str.gsub(/(\${[a-z_]+(\[-?[0-9]+\])?}|__[A-Z_]+__)/) {
+        str.gsub(/(\${[^}]+}|__[A-Z_]+__)/) {
           $log.warn "ec2-metadata: unknown placeholder `#{$1}` found in a tag `#{@placeholders['${tag}']}`" unless @placeholders.include?($1)
           @placeholders[$1]
         }
